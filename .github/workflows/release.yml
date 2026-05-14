@@ -1,0 +1,39 @@
+name: Frontend Release
+
+on:
+  push:
+    tags:
+      - 'ui-v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Verify Dist Folder
+        run: ls -R dist
+
+      - name: Create Artifact Zip
+        run: |
+          zip -r healthchecker-ui-${{ github.ref_name }}.zip dist
+
+      - name: Upload Release Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: healthchecker-ui-${{ github.ref_name }}.zip
