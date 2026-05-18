@@ -1,39 +1,82 @@
-name: Frontend Release
+name: Release UI
 
 on:
-  push:
-    tags:
-      - 'ui-v*'
+ push:
+   tags:
+     - 'ui-v*'
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+ build:
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+   runs-on: ubuntu-latest
 
-      - name: Install dependencies
-        run: npm install
+   steps:
 
-      - name: Build Frontend
-        run: npm run build
+     # -----------------------------------
+     # CHECKOUT
+     # -----------------------------------
 
-      - name: Verify Dist Folder
-        run: ls -R dist
+     - name: Checkout Repository
+       uses: actions/checkout@v4
 
-      - name: Create Artifact Zip
-        run: |
-          zip -r healthchecker-ui-${{ github.ref_name }}.zip dist
+     # -----------------------------------
+     # SETUP NODE
+     # -----------------------------------
 
-      - name: Upload Release Artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          files: healthchecker-ui-${{ github.ref_name }}.zip
+     - name: Setup Node
+       uses: actions/setup-node@v4
+       with:
+         node-version: 20
+
+     # -----------------------------------
+     # INSTALL DEPENDENCIES
+     # -----------------------------------
+
+     - name: Install Dependencies
+       run: npm install
+
+     # -----------------------------------
+     # BUILD UI
+     # -----------------------------------
+
+     - name: Build UI
+       run: npm run build
+
+     # -----------------------------------
+     # ZIP DIST
+     # -----------------------------------
+
+     - name: Zip Dist
+       run: |
+
+         cd dist
+         zip -r ../healthchecker-ui.zip .
+
+     # -----------------------------------
+     # CREATE GITHUB RELEASE
+     # -----------------------------------
+
+     - name: Create GitHub Release
+       uses: softprops/action-gh-release@v2
+       with:
+         files: healthchecker-ui.zip
+
+     # -----------------------------------
+     # TRIGGER BACKEND PIPELINE
+     # -----------------------------------
+
+     - name: Trigger Backend Pipeline
+
+       run: |
+
+         curl -X POST \
+           -H "Accept: application/vnd.github+json" \
+           -H "Authorization: Bearer ${{ secrets.BACKEND_TRIGGER_TOKEN }}" \
+           https://api.github.com/repos/HEMANTRAI233/healthchecker-api/dispatches \
+           -d '{
+             "event_type":"ui_release",
+             "client_payload":{
+               "ui_version":"${{ github.ref_name }}"
+             }
+           }'
