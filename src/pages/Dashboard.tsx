@@ -41,7 +41,8 @@ function Dashboard() {
 
   return (
 <div style={{ padding: "40px" }}>
-<h1>Welcome! Check my health</h1>
+<h1 style={{backgroundColor: "#FFC94A",borderRadius: "20px", border: "4px solid #a32b2b", padding: "10px", textAlign: "center"}}>Welcome! Check my health</h1>
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
 <button
         onClick={loadHealth}
         disabled={loading}
@@ -54,12 +55,13 @@ function Dashboard() {
           border: "none",
           borderRadius: "4px",
           opacity: loading ? 0.6 : 1,
+          justifyContent: "center",
         }}
 >
 
         {loading ? "Checking..." : "Check Now"}
 </button>
-
+</div>
       {status && (
 <div style={{ marginTop: "20px" }}>
 <h2>Backend Status:</h2> {status}
@@ -68,6 +70,9 @@ function Dashboard() {
 </div>
 
       )}
+      <div style={{ marginTop: "40px", textAlign: "center", color: "#888" }}>
+        <p>HealthChecker UI - Developed by HK</p>
+      </div>
 </div>
 
   );
